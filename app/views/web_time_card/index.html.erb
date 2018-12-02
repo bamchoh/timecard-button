@@ -5,9 +5,9 @@
 <%= form_with scope: :card, url: "start" , method: :post, local: true do |form| %>
 	<%= form.hidden_field :status, :value => @status %>
 	<% if @status == "start" %>
-		<%= form.submit "出社", :class => "btn btn-primary btn-block p-5" %>
+		<%= form.submit "出社", :class => "btn btn-primary btn-block " , :style => "font-size: 500%;" %>
 <% else %>
-	<%= form.submit "退社", :class => "btn btn-dark btn-block p-5" %>
+		<%= form.submit "退社", :class => "btn btn-dark btn-block " , :style => "font-size: 500%;" %>
 <% end %>
 	</p>
 <% end %>
