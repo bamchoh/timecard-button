@@ -1,3 +1,6 @@
+<div class=container">
+<div class="row">
+<div class="col-md-4">
 <div class="mx-auto" style="width: 200px;"><h2>Time Card</h2></div>
 <%= form_with scope: :card, url: "start" , method: :post, local: true do |form| %>
 	<%= form.hidden_field :status, :value => @status %>
@@ -28,3 +31,6 @@
 		</tr>
 	<% end %>
 </table>
+</div>
+</div>
+</div>
