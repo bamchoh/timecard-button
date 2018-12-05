@@ -35,4 +35,9 @@ class WebTimeCardControllerTest < ActionDispatch::IntegrationTest
     type = @controller.instance_variable_get(:@worktype)
     assert_equal "end", type
   end
+
+  test "delete all" do
+    post "/delete"
+    assert_equal 0, Card.all.size
+  end
 end

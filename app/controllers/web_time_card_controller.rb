@@ -19,6 +19,11 @@ class WebTimeCardController < ApplicationController
     redirect_to "/index"
   end
 
+  def delete
+    Card.destroy_all
+    redirect_to "/index"
+  end
+
   def post_params
     params["card"]["datetime"] = DateTime.now
     params.require(:card).permit(:datetime, :status)

@@ -3,34 +3,36 @@
 <div class="col-md-4">
 <div class="mx-auto" style="width: 200px;"><h2>Time Card</h2></div>
 <%= form_with scope: :card, url: "start" , method: :post, local: true do |form| %>
-	<%= form.hidden_field :status, :value => @status %>
-	<% if @status == "start" %>
-		<%= form.submit "出社", :class => "btn btn-primary btn-block " , :style => "font-size: 500%;" %>
-<% else %>
-		<%= form.submit "退社", :class => "btn btn-dark btn-block " , :style => "font-size: 500%;" %>
-<% end %>
-	</p>
+  <%= form.hidden_field :status, :value => @worktype %>
+  <% if @worktype == "start" %>
+    <%= form.submit "出社", :class => "btn btn-primary btn-block " , :style => "font-size: 500%;" %>
+  <% else %>
+    <%= form.submit "退社", :class => "btn btn-dark btn-block " , :style => "font-size: 500%;" %>
+  <% end %>
+  </p>
 <% end %>
 
 <table class="table">
-	<thead>
-		<th scope="col">月日</th>
-		<th scope="col">時刻</td>
-		<th scope="col">状況</th>
-	</thead>
-	<% @cards.each do |c| %>
-		<tr>
-			<td><%= c.datetime.strftime("%m月%d日") %></td>
-			<td><%= c.datetime.strftime("%H:%M") %></td>
-			<% if c.status == "start" %>
-				<td class="bg-primary text-white">出社</td>
-		<% else %>
-				<td class="bg-dark text-white">退社</td>
-		<% end %>
+  <thead>
+    <th scope="col">月日</th>
+    <th scope="col">時刻</td>
+    <th scope="col">状況</th>
+  </thead>
+  <% @cards.each do |c| %>
+    <tr>
+      <td><%= c.datetime.strftime("%m月%d日") %></td>
+      <td><%= c.datetime.strftime("%H:%M") %></td>
+      <% if c.status == "start" %>
+        <td class="bg-primary text-white">出社</td>
+      <% else %>
+        <td class="bg-dark text-white">退社</td>
+      <% end %>
 
-		</tr>
-	<% end %>
+    </tr>
+  <% end %>
 </table>
+
+<%= button_to "削除", {action: "delete"}, {:class => "btn btn-danger btn-block"} %>
 </div>
 </div>
 </div>
