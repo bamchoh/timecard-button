@@ -1,9 +1,33 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  status: MyString
-  datetime: 2018-12-02 13:12:50
+row1:
+  status: start
+  datetime: 2018-12-01 09:00:00
 
-two:
-  status: MyString
-  datetime: 2018-12-02 13:12:50
+row2:
+  status: end
+  datetime: 2018-12-01 17:30:00
+
+row3:
+  status: start
+  datetime: 2018-12-02 09:00:00
+
+row4:
+  status: end
+  datetime: 2018-12-02 17:30:00
+
+row5:
+  status: start
+  datetime: 2018-12-03 09:00:00
+
+row6:
+  status: end
+  datetime: 2018-12-03 17:30:00
+
+row7:
+  status: start
+  datetime: 2018-12-04 09:00:00
+
+row8:
+  status: end
+  datetime: 2018-12-04 17:30:00
