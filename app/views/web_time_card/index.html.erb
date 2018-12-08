@@ -1,56 +1,80 @@
-<div class=container">
-<div class="row">
-<div class="col-md-4">
-<div class="mx-auto" style="width: 200px;"><h2>Time Card</h2></div>
-<%= form_with scope: :card, url: "start" , method: :post, local: true do |form| %>
-  <%= form.hidden_field :status, :value => @worktype %>
-  <% if @worktype == "start" %>
-    <%= form.submit "出社", :class => "btn btn-primary btn-block " , :style => "font-size: 500%;" %>
-  <% else %>
-    <%= form.submit "退社", :class => "btn btn-dark btn-block " , :style => "font-size: 500%;" %>
-  <% end %>
-  </p>
-<% end %>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="height:70px">
+  <div class="container">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+    <% if @edit %>
+      <a class="nav-link" href="/">キャンセル</a>
+    <% else %>
+      <a class="nav-link" href="/?edit=1">編集</a>
+    <% end %>
+      </li>
+    </ul>
 
-<table class="table">
-  <thead>
-    <th scope="col">月日</th>
-    <th scope="col">時刻</td>
-    <th scope="col">状況</th>
-  </thead>
-  <% @cards.each do |c| %>
-    <tr>
-      <td><%= c.datetime.strftime("%m月%d日") %></td>
-      <td><%= c.datetime.strftime("%H:%M") %></td>
-      <% if c.status == "start" %>
-        <td class="bg-primary text-white">出社</td>
-      <% else %>
-        <td class="bg-dark text-white">退社</td>
+    <% if @edit %>
+    <form class="form-inline my-2 my-lg-0">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">完了</button>
+    </form>
+    <% end %>
+  </div>
+</nav>
+
+<div class=container">
+  <div class="row">
+    <div class="col-md-4">
+      <%= form_with scope: :card, url: "start" , method: :post, local: true do |form| %>
+        <%= form.hidden_field :status, :value => @worktype %>
+        <% if @worktype == "start" %>
+          <%= form.submit "出社", :class => "btn btn-primary btn-block " , :style => "font-size: 500%;" %>
+        <% else %>
+          <%= form.submit "退社", :class => "btn btn-dark btn-block " , :style => "font-size: 500%;" %>
+        <% end %>
+        </p>
       <% end %>
 
-    </tr>
-  <% end %>
-</table>
+      <table class="table">
+        <thead>
+          <th scope="col">月日</th>
+          <th scope="col">時刻</td>
+          <th scope="col">状況</th>
+        </thead>
+        <% @cards.each do |c| %>
+          <tr>
+            <% if @edit %>
+              <td><input type="date" value="<%= c.datetime.strftime("%Y-%m-%d") %>" min="2018-01-01" max="2100-12-31"></td>
+              <td><input type="time" value="<%= c.datetime.strftime("%H:%M") %>" min="00:00" max="23:59"></td>
+            <% else %>
+              <td><%= c.datetime.strftime("%Y-%m-%d") %></td>
+              <td><%= c.datetime.strftime("%H:%M") %></td>
+            <% end %>
+            <% if c.status == "start" %>
+              <td class="bg-primary text-white">出社</td>
+            <% else %>
+              <td class="bg-dark text-white">退社</td>
+            <% end %>
+
+          </tr>
+        <% end %>
+      </table>
 
 
-<button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#myModal">
-  全て削除
-</button>
+      <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#myModal">
+        全て削除
+      </button>
 
-<div class="modal" tabindex="-1" role="dialog" id="myModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-        <p>本当に削除しますか？</p>
+      <div class="modal" tabindex="-1" role="dialog" id="myModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <p>本当に削除しますか？</p>
+            </div>
+            <div class="modal-footer">
+              <%= button_to "削除", {action: "delete"}, {:class => "btn btn-danger"} %>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">しない</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <%= button_to "削除", {action: "delete"}, {:class => "btn btn-danger"} %>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">しない</button>
-      </div>
+
     </div>
   </div>
-</div>
-
-</div>
-</div>
 </div>

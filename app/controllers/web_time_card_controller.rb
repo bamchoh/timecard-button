@@ -1,5 +1,6 @@
 class WebTimeCardController < ApplicationController
   def index
+    @edit = params["edit"] ? true : false
     @cards = Card.order("datetime")
     unless @cards.empty?
       last = @cards.last
