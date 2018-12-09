@@ -12,6 +12,11 @@ class WebTimeCardController < ApplicationController
     else
       @worktype = "start"
     end
+
+    respond_to do |format|
+      format.html
+      format.json { render json: @cards }
+    end
   end
 
   def start

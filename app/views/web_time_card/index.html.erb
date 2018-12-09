@@ -1,9 +1,41 @@
+<script>
+  function getDate(date) {
+    rawDate = new Date(date);
+    var year = rawDate.getFullYear();
+    var month = (rawDate.getMonth() + 1);
+    var day = rawDate.getDate();
+    return year + "-" + month + "-" + day;
+  }
+
+  function getTime(date) {
+    rawDate = new Date(date);
+    var hour = rawDate.getHours();
+    var minutes = rawDate.getMinutes();
+    return hour + ":" + minutes;
+  }
+
+  $(function() {
+      console.log("aa");
+    $.getJSON("/", null, function(data, status) {
+      for (i in data) {
+        var s_text = "";
+        if(data[i].status == "start") {
+          s_text = '<td class="bg-primary text-white">出社</td>';
+        } else {
+          s_text = '<td class="bg-dark text-white">退社</td>';
+        }
+        $("#tbody").append("<tr><td>" + getDate(data[i].datetime) + "</td><td>" + getTime(data[i].datetime) + "</td>" + s_text + "</tr>");
+      }
+    });
+  });
+</script>
+
 <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark bg-dark" style="height:70px">
   <div class="container">
     <ul class="navbar-nav">
       <li class="nav-item active">
     <% if @edit %>
-      <a class="nav-link" href="/">キャンセル</a>
+      <a class="nav-link" href="/">完了</a>
     <% else %>
       <a class="nav-link" href="/?edit=1">編集</a>
     <% end %>
@@ -12,7 +44,9 @@
 
     <% if @edit %>
     <form class="form-inline my-2 my-lg-0">
-      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">完了</button>
+      <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#myModal">
+        全て削除
+      </button>
     </form>
     <% end %>
   </div>
@@ -37,31 +71,13 @@
           <th scope="col">時刻</td>
           <th scope="col">状況</th>
         </thead>
-        <% @cards.each do |c| %>
-          <tr>
-            <% if @edit %>
-              <td><input type="date" value="<%= c.datetime.strftime("%Y-%m-%d") %>" min="2018-01-01" max="2100-12-31"></td>
-              <td><input type="time" value="<%= c.datetime.strftime("%H:%M") %>" min="00:00" max="23:59"></td>
-            <% else %>
-              <td><%= c.datetime.strftime("%Y-%m-%d") %></td>
-              <td><%= c.datetime.strftime("%H:%M") %></td>
-            <% end %>
-            <% if c.status == "start" %>
-              <td class="bg-primary text-white">出社</td>
-            <% else %>
-              <td class="bg-dark text-white">退社</td>
-            <% end %>
-
-          </tr>
-        <% end %>
+        <tbody id="tbody">
+        <!--
+              <td><input type="date" value="2018-01-01" min="2018-01-01" max="2100-12-31"></td>
+              <td><input type="time" value="23:59" min="00:00" max="23:59"></td>
+        -->
+        </tbody>
       </table>
-
-
-      <% if @edit %>
-      <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#myModal">
-        全て削除
-      </button>
-      <% end %>
 
       <div class="modal" tabindex="-1" role="dialog" id="myModal">
         <div class="modal-dialog" role="document">

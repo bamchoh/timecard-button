@@ -28,7 +28,7 @@
     <%= favicon_link_tag('android-chrome-256x256.png', {:rel => 'icon', :sizes=>'256x256', :type=>'image/png'}) %>
     <%= favicon_link_tag('android-chrome-384x384.png', {:rel => 'icon', :sizes=>'384x384', :type=>'image/png'}) %>
     <%= favicon_link_tag('android-chrome-512x512.png', {:rel => 'icon', :sizes=>'512x512', :type=>'image/png'}) %>
-    <%= favicon_link_tag('manifest.json', {:rel => 'manifest', :type=>'text/json'}) %>
+    <% favicon_link_tag('manifest.json', {:rel => 'manifest', :type=>'text/json'}) %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
