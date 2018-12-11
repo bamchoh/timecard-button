@@ -1,4 +1,18 @@
+<style>
+input[type=time]::-webkit-clear-button ,
+input[type=date]::-webkit-clear-button {
+  -webkit-appearance: none;
+}
+</style>
 <script>
+jQuery(function() {
+  var isEdit = false;
+  var predata = [];
+
+  function handler(e, id) {
+    console.log(e);
+  }
+
   function getDate(date) {
     rawDate = new Date(date);
     var year = rawDate.getFullYear();
@@ -14,14 +28,34 @@
     return ("00"+hour).substr(-2) + ":" + ("00"+minutes).substr(-2);
   }
 
+  function postRecord() {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    $.ajax({
+      async: false,
+      type : 'POST',
+      url  : '/update',
+      contentType: 'application/json',
+      headers: { 'X-CSRF-TOKEN': token },
+      data : JSON.stringify({"data": predata})
+    }).done(function(data, textStatus, jqXHR) {
+      console.log("done");
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      console.log("fail");
+    });
+  }
+
   function addRecord(edit) {
-    $.getJSON("/", null, function(data, status) {
+    $.getJSON("/show", null, function(data, status) {
+      console.log("get data");
+      console.log(data);
+      $("#tbody").empty();
+      predata = data;
       for (i in data) {
         var date_text = "";
         var time_text = "";
         if(edit) {
-          date_text = '<td><input type="date" value="' + getDate(data[i].datetime) + '" min="2018-01-01" max="2100-12-31"></td>';
-          time_text = '<td><input type="time" value="' + getTime(data[i].datetime) + '" min="00:00" max="23:59"></td>';
+          date_text = '<td><input type="date" value="' + getDate(data[i].datetime) + '" rowid=' + i + '></td>';
+          time_text = '<td><input type="time" value="' + getTime(data[i].datetime) + '" rowid=' + i + '></td>';
         } else {
           date_text = '<td>' + getDate(data[i].datetime) + '</td>';
           time_text = '<td>' + getTime(data[i].datetime) + '</td>';
@@ -37,37 +71,55 @@
     });
   }
 
-  function OnLinkClick() {
-    var isEdit = false;
-    if($("#edit").text() == "編集") {
-      isEdit = true;
-    } else {
-      isEdit = false;
-    }
+  $('#tbody').on('change', 'input[type="date"]', function() {
+    var i = $(this).attr('rowid');
+    var orig = new Date(predata[i].datetime);
+    var mod = new Date($(this).val());
+    orig.setFullYear(mod.getFullYear());
+    orig.setMonth(mod.getMonth());
+    orig.setDate(mod.getDate());
+    predata[i].datetime = orig.toJSON();
+  });
 
-    $("#tbody").empty();
-    addRecord(isEdit);
+  $('#tbody').on('change', 'input[type="time"]', function() {
+    var i = $(this).attr('rowid');
+    var orig = new Date(predata[i].datetime);
+    var mod = new Date("2000-01-01T" + $(this).val());
+    orig.setHours(mod.getHours());
+    orig.setMinutes(mod.getMinutes());
+    predata[i].datetime = orig.toJSON();
+  });
 
-    $("#edit").empty();
+  $('#edit').on('click', function() {
     if(isEdit) {
-      $("#edit").append("完了");
-    } else {
-      $("#edit").append("編集");
+      postRecord();
     }
-  }
+
+    addRecord(!isEdit);
+
+    $(this).empty();
+    if(isEdit) {
+      isEdit = false;
+      $(this).append("編集");
+    } else {
+      isEdit = true;
+      $(this).append("完了");
+    }
+  });
 
   $(window).on('load', function() {
     addRecord();
 
     $("#edit").append("編集");
   });
+});
 </script>
 
 <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark bg-dark" style="height:70px">
   <div class="container">
     <ul class="navbar-nav">
       <li class="nav-item active">
-      <a class="nav-link" id="edit" href="javascript:void(0);" onclick="OnLinkClick();"></a>
+      <a class="nav-link" id="edit" href="javascript:void(0);"></a>
       </li>
     </ul>
 
