@@ -84,7 +84,7 @@ input[type=date]::-webkit-clear-button {
     $('#tbody').on('change', 'input[type="time"]', function() {
       var i = $(this).attr('rowid');
       var orig = new Date(predata[i].datetime);
-      var mod = new Date("2000-01-01T" + $(this).val());
+      var mod = new Date("2000-01-01T" + $(this).val() + ":00+09:00");
       orig.setHours(mod.getHours());
       orig.setMinutes(mod.getMinutes());
       predata[i].datetime = orig.toJSON();
