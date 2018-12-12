@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   post '/start' => "web_time_card#start"
 
+  post '/delete_all' => "web_time_card#delete_all"
+
   post '/delete' => "web_time_card#delete"
 
   resources :web_time_card

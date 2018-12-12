@@ -4,6 +4,7 @@ input[type=date]::-webkit-clear-button {
   -webkit-appearance: none;
 }
 </style>
+<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 <script>
   $(window).on('load', function() {
     var isEdit = false;
@@ -44,27 +45,66 @@ input[type=date]::-webkit-clear-button {
       });
     }
 
+    function postDeleteRow(id) {
+      var token = $('meta[name="csrf-token"]').attr('content');
+      $.ajax({
+        async: false,
+        type : 'POST',
+        url  : '/delete',
+        contentType: 'application/json',
+        headers: { 'X-CSRF-TOKEN': token },
+        data : JSON.stringify({"id": id})
+      }).done(function(data, textStatus, jqXHR) {
+        console.log("done");
+      }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.log("fail");
+      });
+    }
+
     function addRecord(edit) {
       $.getJSON("/show", null, function(data, status) {
         $("#tbody").empty();
         predata = data;
+
+        if(edit) {
+          var tr = $("table thead tr");
+          tr.empty();
+          tr.append('<th scope="col">月日</th>');
+          tr.append('<th scope="col">時刻</th>');
+          tr.append('<th scope="col">状況</th>');
+          tr.append('<th scope="col">削除</th>');
+        } else {
+          var tr = $("table thead tr");
+          tr.empty();
+          tr.append('<th scope="col">月日</th>');
+          tr.append('<th scope="col">時刻</th>');
+          tr.append('<th scope="col">状況</th>');
+        }
+
         for (i in data) {
           var date_text = "";
           var time_text = "";
+          var s_text = "";
+          var opt_text = "";
           if(edit) {
             date_text = '<td><input type="date" value="' + getDate(data[i].datetime) + '" rowid=' + i + '></td>';
             time_text = '<td><input type="time" value="' + getTime(data[i].datetime) + '" rowid=' + i + '></td>';
+            if(data[i].status == "start") {
+              s_text = '<td class="bg-primary text-white text-center">出社</td>';
+            } else {
+              s_text = '<td class="bg-dark text-white text-center">退社</td>';
+            }
+            opt_text = '<td class="text-center" id="delrow" rowid='+i+'><i class="fas fa-trash text-danger"></i></td>';
           } else {
             date_text = '<td>' + getDate(data[i].datetime) + '</td>';
             time_text = '<td>' + getTime(data[i].datetime) + '</td>';
+            if(data[i].status == "start") {
+              s_text = '<td class="bg-primary text-white text-center">出社</td>';
+            } else {
+              s_text = '<td class="bg-dark text-white text-center">退社</td>';
+            }
           }
-          var s_text = "";
-          if(data[i].status == "start") {
-            s_text = '<td class="bg-primary text-white">出社</td>';
-          } else {
-            s_text = '<td class="bg-dark text-white">退社</td>';
-          }
-          $("#tbody").append("<tr>" + date_text + time_text + s_text + "</tr>");
+          $("#tbody").append("<tr>" + date_text + time_text + s_text + opt_text + "</tr>");
         }
       });
     }
@@ -89,6 +129,13 @@ input[type=date]::-webkit-clear-button {
         $("#editdone").css("visibility", "hidden");
       }
     }
+
+    $('tbody').on('click', 'tr td[id=delrow]', function() {
+      var i = $(this).attr('rowid');
+      var id = predata[i].id;
+      postDeleteRow(id);
+      addRecord(true);
+    })
 
     $('#tbody').on('change', 'input[type="date"]', function() {
       var i = $(this).attr('rowid');
@@ -152,15 +199,9 @@ input[type=date]::-webkit-clear-button {
 
       <table class="table">
         <thead>
-          <th scope="col">月日</th>
-          <th scope="col">時刻</td>
-          <th scope="col">状況</th>
+          <tr class="text-center"></tr>
         </thead>
         <tbody id="tbody">
-          <!--
-            <td><input type="date" value="2018-01-01" min="2018-01-01" max="2100-12-31"></td>
-            <td><input type="time" value="23:59" min="00:00" max="23:59"></td>
-          -->
         </tbody>
       </table>
 
@@ -171,7 +212,7 @@ input[type=date]::-webkit-clear-button {
               <p>本当に削除しますか？</p>
             </div>
             <div class="modal-footer">
-              <%= button_to "削除", {action: "delete"}, {:class => "btn btn-danger"} %>
+              <%= button_to "削除", {action: "delete_all"}, {:class => "btn btn-danger"} %>
               <button type="button" class="btn btn-secondary" data-dismiss="modal">しない</button>
             </div>
           </div>

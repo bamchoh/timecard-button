@@ -32,6 +32,12 @@ class WebTimeCardController < ApplicationController
   end
 
   def delete
+    id = params["id"]
+    Card.find(id).destroy
+    render status: 200, json: { status: 200, message: "Success" }
+  end
+
+  def delete_all
     Card.destroy_all
     redirect_to "/index"
   end
