@@ -46,8 +46,6 @@ input[type=date]::-webkit-clear-button {
 
     function addRecord(edit) {
       $.getJSON("/show", null, function(data, status) {
-        console.log("get data");
-        console.log(data);
         $("#tbody").empty();
         predata = data;
         for (i in data) {
@@ -71,6 +69,27 @@ input[type=date]::-webkit-clear-button {
       });
     }
 
+
+    function toggleEditState(flag) {
+      addRecord(isEdit);
+
+      var o = $("#edit");
+      o.empty();
+      if(isEdit) {
+        isEdit = false;
+        o.append("キャンセル");
+
+        $("#alldel").css("visibility", "visible");
+        $("#editdone").css("visibility", "visible");
+      } else {
+        isEdit = true;
+        o.append("編集");
+
+        $("#alldel").css("visibility", "hidden");
+        $("#editdone").css("visibility", "hidden");
+      }
+    }
+
     $('#tbody').on('change', 'input[type="date"]', function() {
       var i = $(this).attr('rowid');
       var orig = new Date(predata[i].datetime);
@@ -90,46 +109,32 @@ input[type=date]::-webkit-clear-button {
       predata[i].datetime = orig.toJSON();
     });
 
-    $('#edit').on('click', function() {
-      if(isEdit) {
-        postRecord();
-      }
+    $('#editdone').on('click', function() {
+      postRecord();
 
-      addRecord(!isEdit);
-
-      $(this).empty();
-      if(isEdit) {
-        isEdit = false;
-        $(this).append("編集");
-      } else {
-        isEdit = true;
-        $(this).append("完了");
-      }
+      toggleEditState(isEdit);
     });
 
+    $('#edit').on('click', function() {
+      toggleEditState(isEdit);
+    });
 
-    addRecord();
-
-    $("#edit").append("編集");
+    toggleEditState(false);
   });
 </script>
 
 <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark bg-dark" style="height:70px">
-  <div class="container">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" id="edit" href="javascript:void(0);"></a>
-      </li>
-    </ul>
-
-    <% if @edit %>
-      <form class="form-inline my-2 my-lg-0">
-        <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#myModal">
-          全て削除
-        </button>
-      </form>
-    <% end %>
-  </div>
+  <ul class="nav nav-pills nav-fill">
+    <li class="nav-item">
+      <a class="nav-link active" id="edit" href="javascript:void(0);"></a>
+    </li>
+  </ul>
+  <button id="alldel" type="button" class="btn btn-danger ml-auto" data-toggle="modal" data-target="#myModal" style="visibility:hidden">
+    全て削除
+  </button>
+  <button id="editdone" type="button" class="btn btn-outline-success ml-auto" style="visibility:hidden">
+    完了
+  </button>
 </nav>
 
 <div class=container">
