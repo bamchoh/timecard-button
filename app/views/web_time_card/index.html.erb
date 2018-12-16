@@ -4,9 +4,36 @@ input[type=date]::-webkit-clear-button {
   -webkit-appearance: none;
 }
 </style>
+
 <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 <script>
   $(window).on('load', function() {
+    var config = {
+      apiKey: "AIzaSyAMUwIsLui2uoQnARuNOSsu7NDDSCroJV4",
+      authDomain: "my-sample-project-ead35.firebaseapp.com",
+      databaseURL: "https://my-sample-project-ead35.firebaseio.com",
+      projectId: "my-sample-project-ead35",
+      storageBucket: "my-sample-project-ead35.appspot.com",
+      messagingSenderId: "85638353398"
+    };
+    firebase.initializeApp(config);
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if(user) {
+        toggleEditState(false);
+        addMainButton('<%= @worktype %>');
+
+        $('#display_name').html(user.displayName);
+      } else {
+        var redirect_url = "/login/index" + location.search;
+        if(document.referrer) {
+          var referrer = "referrer=" + encodeURIComponent(document.referrer);
+          redirect_url = redirect_url + (location.search ? '&' : '?') + referrer;
+        }
+        location.href = redirect_url;
+      }
+    });
+
     var isEdit = false;
     var predata = [];
 
@@ -109,6 +136,26 @@ input[type=date]::-webkit-clear-button {
       });
     }
 
+    function addMainButton(worktype) {
+      var btn = $('<input />');
+      btn.attr({
+        type: 'submit',
+        name: 'commit',
+        style: 'font-size: 500%;'
+      });
+
+      if(worktype == 'start') {
+        btn.attr('class', 'btn btn-primary btn-block');
+        btn.attr('value', '出社');
+        btn.attr('data-disable-with', '出社');
+      } else {
+        btn.attr('class', 'btn btn-dark btn-block');
+        btn.attr('value', '退社');
+        btn.attr('data-disable-with', '退社');
+      }
+
+      $('#worktype_form').append(btn);
+    }
 
     function toggleEditState(flag) {
       addRecord(isEdit);
@@ -165,8 +212,6 @@ input[type=date]::-webkit-clear-button {
     $('#edit').on('click', function() {
       toggleEditState(isEdit);
     });
-
-    toggleEditState(false);
   });
 </script>
 
@@ -187,14 +232,9 @@ input[type=date]::-webkit-clear-button {
 <div class=container">
   <div class="row">
     <div class="col-md-4">
-      <%= form_with scope: :card, url: "start" , method: :post, local: true do |form| %>
+      <h4 id='display_name'>Loading...</h4>
+      <%= form_with scope: :card, url: "start" , method: :post, local: true, id: 'worktype_form' do |form| %>
         <%= form.hidden_field :status, :value => @worktype %>
-        <% if @worktype == "start" %>
-          <%= form.submit "出社", :class => "btn btn-primary btn-block " , :style => "font-size: 500%;" %>
-        <% else %>
-          <%= form.submit "退社", :class => "btn btn-dark btn-block " , :style => "font-size: 500%;" %>
-        <% end %>
-        </p>
       <% end %>
 
       <table class="table">

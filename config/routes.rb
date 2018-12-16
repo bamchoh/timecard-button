@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'login/index'
   post '/start' => "web_time_card#start"
 
   post '/delete_all' => "web_time_card#delete_all"
