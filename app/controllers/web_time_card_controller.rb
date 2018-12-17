@@ -1,7 +1,5 @@
 class WebTimeCardController < ApplicationController
   def index
-    _index
-
     respond_to do |format|
       format.html
     end
@@ -44,23 +42,13 @@ class WebTimeCardController < ApplicationController
 
   def post_params
     params["card"]["datetime"] = DateTime.now
-    params.require(:card).permit(:datetime, :status)
+    params.require(:card).permit(:datetime, :status, :uid)
   end
 
   private
 
   def _index
     @edit = params["edit"] ? true : false
-    @cards = Card.order("datetime")
-    unless @cards.empty?
-      last = @cards.last
-      if last.status.to_s == "start"
-        @worktype = "end"
-      else
-        @worktype = "start"
-      end
-    else
-      @worktype = "start"
-    end
+    @cards = Card.where(uid: params["uid"]).order("datetime")
   end
 end

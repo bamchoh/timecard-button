@@ -20,8 +20,8 @@ input[type=date]::-webkit-clear-button {
 
     firebase.auth().onAuthStateChanged(function(user) {
       if(user) {
-        toggleEditState(false);
-        addMainButton('<%= @worktype %>');
+        var worktype = toggleEditState(false);
+        addMainButton(worktype);
 
         $('#display_name').html(user.displayName);
       } else {
@@ -34,12 +34,7 @@ input[type=date]::-webkit-clear-button {
       }
     });
 
-    var isEdit = false;
     var predata = [];
-
-    function handler(e, id) {
-      console.log(e);
-    }
 
     function getDate(date) {
       rawDate = new Date(date);
@@ -89,54 +84,94 @@ input[type=date]::-webkit-clear-button {
     }
 
     function addRecord(edit) {
-      $.getJSON("/show", null, function(data, status) {
-        $("#tbody").empty();
-        predata = data;
+      var user = firebase.auth().currentUser;
+      var worktype = '';
+      $.ajax({
+        async: false,
+        type : 'GET',
+        url  : '/show',
+        contentType: 'application/json',
+        data: {"uid":user.uid },
+        success: function(data) {
+          $("#tbody").empty();
+          predata = data;
 
-        if(edit) {
-          var tr = $("table thead tr");
-          tr.empty();
-          tr.append('<th scope="col">月日</th>');
-          tr.append('<th scope="col">時刻</th>');
-          tr.append('<th scope="col">状況</th>');
-          tr.append('<th scope="col">削除</th>');
-        } else {
-          var tr = $("table thead tr");
-          tr.empty();
-          tr.append('<th scope="col">月日</th>');
-          tr.append('<th scope="col">時刻</th>');
-          tr.append('<th scope="col">状況</th>');
-        }
-
-        for (i in data) {
-          var date_text = "";
-          var time_text = "";
-          var s_text = "";
-          var opt_text = "";
           if(edit) {
-            date_text = '<td><input type="date" value="' + getDate(data[i].datetime) + '" rowid=' + i + '></td>';
-            time_text = '<td><input type="time" value="' + getTime(data[i].datetime) + '" rowid=' + i + '></td>';
-            if(data[i].status == "start") {
-              s_text = '<td class="bg-primary text-white text-center">出社</td>';
-            } else {
-              s_text = '<td class="bg-dark text-white text-center">退社</td>';
-            }
-            opt_text = '<td class="text-center" id="delrow" rowid='+i+'><i class="fas fa-trash text-danger"></i></td>';
+            var tr = $("table thead tr");
+            tr.empty();
+            tr.append('<th scope="col">月日</th>');
+            tr.append('<th scope="col">時刻</th>');
+            tr.append('<th scope="col">状況</th>');
+            tr.append('<th scope="col">削除</th>');
           } else {
-            date_text = '<td>' + getDate(data[i].datetime) + '</td>';
-            time_text = '<td>' + getTime(data[i].datetime) + '</td>';
-            if(data[i].status == "start") {
-              s_text = '<td class="bg-primary text-white text-center">出社</td>';
-            } else {
-              s_text = '<td class="bg-dark text-white text-center">退社</td>';
-            }
+            var tr = $("table thead tr");
+            tr.empty();
+            tr.append('<th scope="col">月日</th>');
+            tr.append('<th scope="col">時刻</th>');
+            tr.append('<th scope="col">状況</th>');
           }
-          $("#tbody").append("<tr>" + date_text + time_text + s_text + opt_text + "</tr>");
+
+          for (i in data) {
+            var date_text = "";
+            var time_text = "";
+            var s_text = "";
+            var opt_text = "";
+            if(edit) {
+              date_text = '<td><input type="date" value="' + getDate(data[i].datetime) + '" rowid=' + i + '></td>';
+              time_text = '<td><input type="time" value="' + getTime(data[i].datetime) + '" rowid=' + i + '></td>';
+              if(data[i].status == "start") {
+                s_text = '<td class="bg-primary text-white text-center">出社</td>';
+              } else {
+                s_text = '<td class="bg-dark text-white text-center">退社</td>';
+              }
+              opt_text = '<td class="text-center" id="delrow" rowid='+i+'><i class="fas fa-trash text-danger"></i></td>';
+            } else {
+              date_text = '<td>' + getDate(data[i].datetime) + '</td>';
+              time_text = '<td>' + getTime(data[i].datetime) + '</td>';
+              if(data[i].status == "start") {
+                s_text = '<td class="bg-primary text-white text-center">出社</td>';
+              } else {
+                s_text = '<td class="bg-dark text-white text-center">退社</td>';
+              }
+            }
+            $("#tbody").append("<tr>" + date_text + time_text + s_text + opt_text + "</tr>");
+          }
+
+          if(data.length == 0 ){
+            worktype = "start";
+            return;
+          }
+
+          var last_status = data[data.length-1].status;
+          if(last_status == "start") {
+            worktype = "end";
+            return;
+          }
+
+          worktype = "start";
         }
       });
+
+      return worktype;
     }
 
     function addMainButton(worktype) {
+      var wt_field = $('<input />');
+      wt_field.attr({
+        type: 'hidden',
+        name: 'card[status]',
+        id: 'card_status',
+        value: worktype,
+      });
+
+      var uid = $('<input />');
+      uid.attr({
+        type: 'hidden',
+        name: 'card[uid]',
+        id: 'card_uid',
+        value: firebase.auth().currentUser.uid,
+      });
+
       var btn = $('<input />');
       btn.attr({
         type: 'submit',
@@ -154,27 +189,29 @@ input[type=date]::-webkit-clear-button {
         btn.attr('data-disable-with', '退社');
       }
 
+      $('#worktype_form').append(wt_field);
+      $('#worktype_form').append(uid);
       $('#worktype_form').append(btn);
     }
 
     function toggleEditState(flag) {
-      addRecord(isEdit);
+      var worktype = addRecord(flag);
 
       var o = $("#edit");
       o.empty();
-      if(isEdit) {
-        isEdit = false;
+      if(flag) {
         o.append("キャンセル");
 
         $("#alldel").css("visibility", "visible");
         $("#editdone").css("visibility", "visible");
       } else {
-        isEdit = true;
         o.append("編集");
 
         $("#alldel").css("visibility", "hidden");
         $("#editdone").css("visibility", "hidden");
       }
+
+      return worktype;
     }
 
     $('tbody').on('click', 'tr td[id=delrow]', function() {
@@ -206,11 +243,15 @@ input[type=date]::-webkit-clear-button {
     $('#editdone').on('click', function() {
       postRecord();
 
-      toggleEditState(isEdit);
+      toggleEditState(false);
     });
 
     $('#edit').on('click', function() {
-      toggleEditState(isEdit);
+      if($(this).text() == '編集') {
+        toggleEditState(true);
+      } else {
+        toggleEditState(false);
+      }
     });
   });
 </script>
@@ -218,7 +259,7 @@ input[type=date]::-webkit-clear-button {
 <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark bg-dark" style="height:70px">
   <ul class="nav nav-pills nav-fill">
     <li class="nav-item">
-      <a class="nav-link active" id="edit" href="javascript:void(0);"></a>
+      <a class="nav-link active" id="edit"></a>
     </li>
   </ul>
   <button id="alldel" type="button" class="btn btn-danger ml-auto" data-toggle="modal" data-target="#myModal" style="visibility:hidden">
@@ -234,7 +275,6 @@ input[type=date]::-webkit-clear-button {
     <div class="col-md-4">
       <h4 id='display_name'>Loading...</h4>
       <%= form_with scope: :card, url: "start" , method: :post, local: true, id: 'worktype_form' do |form| %>
-        <%= form.hidden_field :status, :value => @worktype %>
       <% end %>
 
       <table class="table">
