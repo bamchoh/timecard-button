@@ -1,3 +1,7 @@
 // Place all the styles related to the web-time-card controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+input[type=time]::-webkit-clear-button ,
+input[type=date]::-webkit-clear-button {
+  -webkit-appearance: none;
+}

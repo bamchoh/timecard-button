@@ -31,7 +31,6 @@
     <% favicon_link_tag('manifest.json', {:rel => 'manifest', :type=>'text/json'}) %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
     <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-auth.js"></script>
     <script src="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.js"></script>
@@ -40,11 +39,7 @@
 
   <body style="padding-bottom: 70px;">
     <%= yield %>
-
-    <script>
-      $('#myModal').on('shown.bs.modal', function() {
-        $('#myInput').trigger('focus')
-      })
-    </script>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= yield :footer %>
   </body>
 </html>
