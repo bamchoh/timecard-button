@@ -13,17 +13,37 @@ $(window).on('load', function() {
 
   firebase.auth().onAuthStateChanged(function(user) {
     if(user) {
+      document.getElementById('loader').style.display = 'none';
       var worktype = toggleEditState(false);
       addMainButton(worktype);
 
       $('#display_name').html(user.displayName);
     } else {
-      var redirect_url = "/login/index" + location.search;
-      if(document.referrer) {
-        var referrer = "referrer=" + encodeURIComponent(document.referrer);
-        redirect_url = redirect_url + (location.search ? '&' : '?') + referrer;
-      }
-      location.href = redirect_url;
+      var ui = new firebaseui.auth.AuthUI(firebase.auth());
+      var uiConfig = {
+        callbacks: {
+          signInSuccessWithAuthResult: function(currentUser, credential, redirectUrl) {
+            console.log("signInSuccess");
+            // サインイン成功時のコールバック関数
+            // 戻り値で自動的にリダイレクトするかどうかを指定
+            return true;
+          },
+          uiShown: function() {
+            document.getElementById('body').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+          }
+        },
+        // リダイレクトではなく、ポップアップでサインインフローを表示
+        signInFlow: 'popup',
+        signInSuccessUrl: '/',
+        signInOptions: [
+          // サポートするプロバイダ(メールアドレス)を指定
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        ],
+        // Terms of service url.
+        tosUrl: '/'
+      };
+      ui.start('#firebaseui-auth-container', uiConfig);
     }
   });
 

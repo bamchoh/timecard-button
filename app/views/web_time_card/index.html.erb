@@ -1,3 +1,4 @@
+<div id='body'>
 <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark bg-dark" style="height:70px">
   <ul class="nav nav-pills nav-fill">
     <li class="nav-item">
@@ -15,7 +16,7 @@
 <div class=container">
   <div class="row">
     <div class="col-md-4">
-      <h4 id='display_name'>Loading...</h4>
+      <h4 id='display_name'></h4>
       <%= form_with scope: :card, url: "start" , method: :post, local: true, id: 'worktype_form' do |form| %>
       <% end %>
 
@@ -44,8 +45,12 @@
     </div>
   </div>
 </div>
-
 <%= content_for :footer do %>
+</div>
+
+<div id="firebaseui-auth-container"></div>
+<h4 id='loader'>Loading...</h4>
+
 <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 <script>
   $('#myModal').on('shown.bs.modal', function() {
