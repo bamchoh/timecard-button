@@ -6,7 +6,8 @@ class WebTimeCardController < ApplicationController
   end
 
   def show
-    _index
+    @edit = params["edit"] ? true : false
+    @cards = Card.where(uid: params["uid"]).order("datetime DESC")
 
     respond_to do |format|
       format.json { render json: @cards }
@@ -43,12 +44,5 @@ class WebTimeCardController < ApplicationController
   def post_params
     params["card"]["datetime"] = DateTime.now
     params.require(:card).permit(:datetime, :status, :uid)
-  end
-
-  private
-
-  def _index
-    @edit = params["edit"] ? true : false
-    @cards = Card.where(uid: params["uid"]).order("datetime")
   end
 end

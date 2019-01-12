@@ -155,7 +155,7 @@ $(window).on('load', function() {
           return;
         }
 
-        var last_status = data[data.length-1].status;
+        var last_status = data[0].status;
         if(last_status == "start") {
           worktype = "end";
           return;
