@@ -153,7 +153,6 @@ $(window).on('load', function() {
           tr.empty();
           tr.append('<th scope="col">出社</th>');
           tr.append('<th scope="col">退社</th>');
-          tr.append('<th scope="col">削除</th>');
 
           var fn = function(beginData, finishData, beginRowID, finishRowID) {
             if(finishData == null) {
@@ -184,19 +183,9 @@ $(window).on('load', function() {
               }));
             }
 
-            var delButton = $('<td></td>').attr({
-              class: 'text-center',
-              id: 'delrow',
-              rowid: i,
-              tcid: data[i].id,
-            }).append($('<i></i>').attr({
-              class: 'fas fa-trash text-danger',
-            }));
-
             var row = $('<tr></tr>');
             row.append(begin);
             row.append(finish);
-            row.append(delButton);
             $("#tbody").append(row);
           };
         }
@@ -282,12 +271,10 @@ $(window).on('load', function() {
     if(flag) {
       o.append("キャンセル");
 
-      $("#alldel").css("visibility", "visible");
       $("#editdone").css("visibility", "visible");
     } else {
       o.append("編集");
 
-      $("#alldel").css("visibility", "hidden");
       $("#editdone").css("visibility", "hidden");
     }
 
