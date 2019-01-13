@@ -64,6 +64,12 @@ $(window).on('load', function() {
     return ("00"+hour).substr(-2) + ":" + ("00"+minutes).substr(-2);
   }
 
+  function getDateTime(datetime) {
+    var date = getDate(datetime);
+    var time = getTime(datetime);
+    return date+"T"+time;
+  }
+
   function postRecord() {
     var token = $('meta[name="csrf-token"]').attr('content');
     $.ajax({
@@ -109,45 +115,106 @@ $(window).on('load', function() {
         $("#tbody").empty();
         predata = data;
 
-        if(edit) {
-          var tr = $("table thead tr");
+        var tr = $("table thead tr");
+
+        if(!edit) {
           tr.empty();
           tr.append('<th scope="col">月日</th>');
-          tr.append('<th scope="col">時刻</th>');
-          tr.append('<th scope="col">状況</th>');
-          tr.append('<th scope="col">削除</th>');
+          tr.append('<th scope="col">出社</th>');
+          tr.append('<th scope="col">退社</th>');
+          var fn = function(beginData, finishData) {
+            if(finishData == null) {
+              var datetime = $('<td></td>').append(getDate(beginData.datetime));
+            } else {
+              var datetime = $('<td></td>').append(getDate(finishData.datetime));
+            }
+
+            var begin = $('<td></td>');
+            if(beginData != null) {
+              begin.attr({
+                class: 'bg-primary text-white text-center',
+              }).append(getTime(beginData.datetime));
+            }
+
+            var finish = $('<td></td>');
+            if(finishData != null) {
+              finish.attr({
+                class: 'bg-dark text-white text-center',
+              }).append(getTime(finishData.datetime));
+            }
+
+            var row = $('<tr></tr>');
+            row.append(datetime);
+            row.append(begin);
+            row.append(finish);
+            $("#tbody").append(row);
+          };
         } else {
-          var tr = $("table thead tr");
           tr.empty();
-          tr.append('<th scope="col">月日</th>');
-          tr.append('<th scope="col">時刻</th>');
-          tr.append('<th scope="col">状況</th>');
+          tr.append('<th scope="col">出社</th>');
+          tr.append('<th scope="col">退社</th>');
+          tr.append('<th scope="col">削除</th>');
+
+          var fn = function(beginData, finishData, beginRowID, finishRowID) {
+            if(finishData == null) {
+              var tmptime = beginData.datetime;
+            } else {
+              var tmptime = finishData.datetime;
+            }
+
+            var begin = $('<td></td>');
+            if(beginData != null) {
+              begin.attr({
+                class: 'bg-primary text-white text-center'
+              }).append($('<input />').attr({
+                type: 'datetime-local',
+                value: getDateTime(beginData.datetime),
+                rowid: beginRowID,
+              }));
+            }
+
+            var finish = $('<td></td>');
+            if(finishData != null) {
+              finish.attr({
+                class: 'bg-dark text-white text-center'
+              }).append($('<input />').attr({
+                type: 'datetime-local',
+                value: getDateTime(finishData.datetime),
+                rowid: finishRowID,
+              }));
+            }
+
+            var delButton = $('<td></td>').attr({
+              class: 'text-center',
+              id: 'delrow',
+              rowid: i,
+              tcid: data[i].id,
+            }).append($('<i></i>').attr({
+              class: 'fas fa-trash text-danger',
+            }));
+
+            var row = $('<tr></tr>');
+            row.append(begin);
+            row.append(finish);
+            row.append(delButton);
+            $("#tbody").append(row);
+          };
         }
 
-        for (i in data) {
-          var date_text = "";
-          var time_text = "";
-          var s_text = "";
-          var opt_text = "";
-          if(edit) {
-            date_text = '<td><input type="date" value="' + getDate(data[i].datetime) + '" rowid=' + i + '></td>';
-            time_text = '<td><input type="time" value="' + getTime(data[i].datetime) + '" rowid=' + i + '></td>';
-            if(data[i].status == "start") {
-              s_text = '<td class="bg-primary text-white text-center">出社</td>';
-            } else {
-              s_text = '<td class="bg-dark text-white text-center">退社</td>';
-            }
-            opt_text = '<td class="text-center" id="delrow" rowid='+i+'><i class="fas fa-trash text-danger"></i></td>';
+        var prevdata = null;
+        var previ = null;
+        for(var i = 0;i<data.length;i++) {
+          if(data[i].status == "start") {
+            fn(data[i], prevdata, i, previ);
+            prevdata = null;
+            previ = null;
           } else {
-            date_text = '<td>' + getDate(data[i].datetime) + '</td>';
-            time_text = '<td>' + getTime(data[i].datetime) + '</td>';
-            if(data[i].status == "start") {
-              s_text = '<td class="bg-primary text-white text-center">出社</td>';
-            } else {
-              s_text = '<td class="bg-dark text-white text-center">退社</td>';
+            if(prevdata != null) {
+              fn(null, prevdata, i, previ);
             }
+            prevdata = data[i];
+            previ = i;
           }
-          $("#tbody").append("<tr>" + date_text + time_text + s_text + opt_text + "</tr>");
         }
 
         if(data.length == 0 ){
@@ -234,23 +301,11 @@ $(window).on('load', function() {
     addRecord(true);
   })
 
-  $('#tbody').on('change', 'input[type="date"]', function() {
+  $('#tbody').on('change', 'input[type="datetime-local"]', function() {
     var i = $(this).attr('rowid');
-    var orig = new Date(predata[i].datetime);
+    console.log(i);
     var mod = new Date($(this).val());
-    orig.setFullYear(mod.getFullYear());
-    orig.setMonth(mod.getMonth());
-    orig.setDate(mod.getDate());
-    predata[i].datetime = orig.toJSON();
-  });
-
-  $('#tbody').on('change', 'input[type="time"]', function() {
-    var i = $(this).attr('rowid');
-    var orig = new Date(predata[i].datetime);
-    var mod = new Date("2000-01-01T" + $(this).val() + ":00+09:00");
-    orig.setHours(mod.getHours());
-    orig.setMinutes(mod.getMinutes());
-    predata[i].datetime = orig.toJSON();
+    predata[i].datetime = mod.toJSON();
   });
 
   $('#editdone').on('click', function() {
