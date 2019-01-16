@@ -7,7 +7,7 @@ class WebTimeCardController < ApplicationController
 
   def show
     @edit = params["edit"] ? true : false
-    @cards = Card.where(uid: params["uid"]).order("datetime DESC")
+    @cards = Card.where(uid: params["uid"]).order("datetime DESC").limit(30)
 
     respond_to do |format|
       format.json { render json: @cards }
