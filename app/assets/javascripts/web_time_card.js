@@ -38,7 +38,10 @@ $(window).on('load', function() {
         signInSuccessUrl: '/',
         signInOptions: [
           // サポートするプロバイダ(メールアドレス)を指定
-          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          {
+            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
+          }
         ],
         // Terms of service url.
         tosUrl: '/'
@@ -290,8 +293,9 @@ $(window).on('load', function() {
 
   $('#tbody').on('change', 'input[type="datetime-local"]', function() {
     var i = $(this).attr('rowid');
-    console.log(i);
-    var mod = new Date($(this).val());
+    var j = predata[i].datetime.lastIndexOf("+")
+    var tz = predata[i].datetime.substring(j, predata[i].datetime.length);
+    var mod = new Date($(this).val()+":00.000"+tz);
     predata[i].datetime = mod.toJSON();
   });
 
