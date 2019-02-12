@@ -295,8 +295,12 @@ $(window).on('load', function() {
     var i = $(this).attr('rowid');
     console.log(i)
     console.log(predata[i])
-    var j = predata[i].datetime.lastIndexOf("+")
-    var tz = predata[i].datetime.substring(j, predata[i].datetime.length);
+    if(predata[i].datetime === null) {
+      var tz = "+09:00"
+    } else {
+      var j = predata[i].datetime.lastIndexOf("+")
+      var tz = predata[i].datetime.substring(j, predata[i].datetime.length);
+    }
     console.log(tz)
     console.log($(this).val()+":00.000"+tz)
     predata[i].datetime = $(this).val()+":00.000"+tz;
